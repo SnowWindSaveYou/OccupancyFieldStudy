@@ -1,0 +1,33 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel DragFlow
+
+RWTexture3D<float> _OccTex;
+RWTexture3D<float3> _FlowTex;
+
+uint3 _VoxelOffset;
+float3 _CursorPos;
+float3 _CursorRadius;
+
+float getCursorDist(float3 voxelPos){
+	float3 p = voxelPos - _CursorPos;
+	float k0 = length(p/_CursorRadius);
+	float k1 = length(p/_CursorRadius*_CursorRadius);
+	return k0*(k0-1)/k1;
+}
+
+[numthreads(8,8,8)]
+void DragFlow (uint3 id : SV_DispatchThreadID)
+{
+
+}
+[numthreads(8,8,8)]
+void InitFlow (uint3 id : SV_DispatchThreadID)
+{
+	_FlowTex[id] = 0;
+}
+
+[numthreads(8,8,8)]
+void ProcessFlow (uint3 id : SV_DispatchThreadID)
+{
+	
+}

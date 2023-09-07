@@ -1,0 +1,33 @@
+#pragma kernel CSMain
+RWTexture3D<float> ResultTex;
+Texture3D<float> InputTex;
+
+
+
+SamplerState myLinearClampSampler;
+float SampleLinear(float3 p)
+{
+	// need to mitigate the offset in p[x], so +float3(0.5) to be in [0;1] range
+	return InputTex.SampleLevel(myLinearClampSampler, p, 0).x;
+}
+
+[numthreads(8,8,8)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float rate = 0;
+    
+    const int k_size = 32;
+    for(int i = 0;i<k_size;i++){
+        for(int j = 0;j<k_size;j++){
+            for(int k = 0;k<k_size;k++){
+                float3 shifts = float3(i,j,k)/float(k_size);                
+                rate+= sign(SampleLinear((id+shifts)/64.0));
+                //rate+= (SampleLinear((id)/64.0));
+//rate+= i;
+            }
+        }
+    }
+    rate/=pow(k_size,3);
+
+    ResultTex[id.xyz] = rate;
+}
