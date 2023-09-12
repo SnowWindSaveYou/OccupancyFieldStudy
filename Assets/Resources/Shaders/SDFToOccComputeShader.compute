@@ -3,27 +3,63 @@ RWTexture3D<float> ResultTex;
 Texture3D<float> InputTex;
 
 
+    // float downa = SampleLinear((id+float3(0,0,0))/64.0).x;
+    // float downb = SampleLinear((id+float3(1,0,0))/64.0).x;
+    // float downc = SampleLinear((id+float3(0,1,0))/64.0).x;
+    // float downd = SampleLinear((id+float3(1,1,0))/64.0).x;
 
-SamplerState myLinearClampSampler;
+    // float upa = SampleLinear((id+float3(0,0,1))/64.0).x;
+    // float upb = SampleLinear((id+float3(1,0,1))/64.0).x;
+    // float upc = SampleLinear((id+float3(0,1,1))/64.0).x;
+    // float upd = SampleLinear((id+float3(1,1,1))/64.0).x;
+
+
+// SamplerState myLinearClampSampler;
+SamplerState trilinear_clamp_sampler;
 float SampleLinear(float3 p)
-{
-	// need to mitigate the offset in p[x], so +float3(0.5) to be in [0;1] range
-	return InputTex.SampleLevel(myLinearClampSampler, p, 0).x;
+{	// need to mitigate the offset in p[x], so +float3(0.5) to be in [0;1] range
+	return InputTex.SampleLevel(trilinear_clamp_sampler, p, 0).x;
+}
+
+
+float sample_linear(float2 fracPos,float a,float b,float c,float d){
+    float ab = lerp(a,b,fracPos.x);
+    float cd = lerp(c,d,fracPos.x);
+    return lerp(ab,cd,fracPos.y);
+}
+
+float sample_trip(float3 fracPos,
+    float upa,float upb,float upc,float upd,
+    float downa,float downb,float downc,float downd
+){
+    float down = sample_linear(fracPos.xy, downa,downb,downc,downd);
+    float up = sample_linear(fracPos.xy, upa,upb,upc,upd);
+    return lerp(down,up,fracPos.z);
 }
 
 [numthreads(8,8,8)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float rate = 0;
-    
+
+    float downa = InputTex[id+uint3(0,0,0)].x;
+    float downb = InputTex[id+uint3(1,0,0)].x;
+    float downc = InputTex[id+uint3(0,1,0)].x;
+    float downd = InputTex[id+uint3(1,1,0)].x;
+
+    float upa = InputTex[id+uint3(0,0,1)].x;
+    float upb = InputTex[id+uint3(1,0,1)].x;
+    float upc = InputTex[id+uint3(0,1,1)].x;
+    float upd = InputTex[id+uint3(1,1,1)].x;
+
     const int k_size = 32;
     for(int i = 0;i<k_size;i++){
         for(int j = 0;j<k_size;j++){
             for(int k = 0;k<k_size;k++){
-                float3 shifts = float3(i,j,k)/float(k_size);                
-                rate+= sign(SampleLinear((id+shifts)/64.0));
-                //rate+= (SampleLinear((id)/64.0));
-//rate+= i;
+                float3 shifts =  float3(i,j,k)/float(k_size);                
+                rate+= max(sign(SampleLinear((id+shifts)/64.0)),0);
+                
+                // rate+= max(sign(sample_trip(shifts, upa,upb,upc,upd,downa,downb,downc,downd)),0);
             }
         }
     }

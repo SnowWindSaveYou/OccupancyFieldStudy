@@ -549,9 +549,9 @@ void MarchingCubes(uint3 threadId : SV_DispatchThreadID)
 			//v0.vNormal = tn;
 			//v1.vNormal = tn;
 			//v2.vNormal = tn;
-			v0.vNormal = -normalize(CalculateGradient(v0.vPosition));
-			v1.vNormal = -normalize(CalculateGradient(v1.vPosition));
-			v2.vNormal = -normalize(CalculateGradient(v2.vPosition));
+			v0.vNormal = normalize(CalculateGradient(v0.vPosition));
+			v1.vNormal = normalize(CalculateGradient(v1.vPosition));
+			v2.vNormal = normalize(CalculateGradient(v2.vPosition));
 
 
 			t.v[0] = v2;

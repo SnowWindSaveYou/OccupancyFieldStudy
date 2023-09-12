@@ -21,6 +21,9 @@ public class CursorControler : MonoBehaviour
     public UnityEvent OnDraging;
     public UnityEvent OnDragEnd;
 
+    public UnityEvent<Vector3> OnTranslate;
+    public UnityEvent<float> OnScale;
+
     bool MakeMouseAttachToCurrentVoi()
     {
         if (targetCollider != null)
@@ -44,7 +47,7 @@ public class CursorControler : MonoBehaviour
     void MakeMouseAttachToScreenPlane()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        float currDist = _preDist;//开始时设置
+        float currDist = _preDist;//??????????
         var mouseScroll = Input.GetAxis("Mouse ScrollWheel");
         if (mouseScroll != 0)
         {
@@ -78,12 +81,20 @@ public class CursorControler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        OnTranslate?.Invoke(this.transform.position);
+        OnScale?.Invoke(this.transform.lossyScale.x);
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (this.transform.hasChanged)
+        {
+            this.transform.hasChanged = false;
+            OnTranslate?.Invoke(this.transform.position);
+            OnScale?.Invoke(this.transform.lossyScale.x);
+        }
+
         if (!_mouseDraging)
         {
             MakeMouseAttachToCurrentVoi();
@@ -107,6 +118,7 @@ public class CursorControler : MonoBehaviour
         {
             this.transform.localScale += Vector3.one * this.transform.localScale.x * 0.5f * mouseScroll;
         }
+
 
     }
 }

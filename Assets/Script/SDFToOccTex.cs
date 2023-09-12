@@ -55,6 +55,7 @@ class SDFToOccTexEditor : Editor
         if (GUILayout.Button("Process"))
         {
             that.ProcessTransfer();
+            that.OccGo.UpdateOccRenderer();
             Debug.Log("Process Done ");
         }
     }
