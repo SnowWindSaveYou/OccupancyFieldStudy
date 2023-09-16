@@ -42,28 +42,30 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 {
     float rate = 0;
 
-    float downa = InputTex[id+uint3(0,0,0)].x;
-    float downb = InputTex[id+uint3(1,0,0)].x;
-    float downc = InputTex[id+uint3(0,1,0)].x;
-    float downd = InputTex[id+uint3(1,1,0)].x;
+    // float downa = InputTex[id+uint3(0,0,0)].x;
+    // float downb = InputTex[id+uint3(1,0,0)].x;
+    // float downc = InputTex[id+uint3(0,1,0)].x;
+    // float downd = InputTex[id+uint3(1,1,0)].x;
 
-    float upa = InputTex[id+uint3(0,0,1)].x;
-    float upb = InputTex[id+uint3(1,0,1)].x;
-    float upc = InputTex[id+uint3(0,1,1)].x;
-    float upd = InputTex[id+uint3(1,1,1)].x;
+    // float upa = InputTex[id+uint3(0,0,1)].x;
+    // float upb = InputTex[id+uint3(1,0,1)].x;
+    // float upc = InputTex[id+uint3(0,1,1)].x;
+    // float upd = InputTex[id+uint3(1,1,1)].x;
 
     const int k_size = 32;
     for(int i = 0;i<k_size;i++){
         for(int j = 0;j<k_size;j++){
             for(int k = 0;k<k_size;k++){
-                float3 shifts =  float3(i,j,k)/float(k_size);                
-                rate+= max(sign(SampleLinear((id+shifts)/64.0)),0);
+                float3 shifts =  float3(i,j,k)/float(k_size);   
+                float sample = SampleLinear((id+shifts)/64.0);    
+
+                rate+= max(sign(sample),0);
                 
                 // rate+= max(sign(sample_trip(shifts, upa,upb,upc,upd,downa,downb,downc,downd)),0);
             }
         }
     }
     rate/=pow(k_size,3);
-
+    rate= 1-rate;
     ResultTex[id.xyz] = rate;
 }

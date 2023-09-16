@@ -44,7 +44,7 @@ public class OccEditManager : MonoBehaviour
     int kernel_expandFlow;
     int kernel_shinkFlow;
     int kernel_copy;
-
+    int kernel_refine;
     int idx_VoxelOffset;
     int idx_VoxelDim;
     int idx_CursorPos;
@@ -94,8 +94,14 @@ public class OccEditManager : MonoBehaviour
             _EditOccCS.SetTexture(kernel_shinkFlow, idx_OccTex, OccTex);
             DispatchTexSize(_EditOccCS, kernel_shinkFlow);
         }
-
+        //RefineOccTex();
         targetOccObj.UpdateOccRenderer();
+    }
+
+    public void RefineOccTex()
+    {
+        _EditOccCS.SetTexture(kernel_refine, idx_OccTex, targetOccObj.OccupanceTex);
+        DispatchTexSize(_EditOccCS, kernel_refine);
     }
 
 
@@ -137,6 +143,7 @@ public class OccEditManager : MonoBehaviour
         kernel_expandFlow = _EditOccCS.FindKernel("ExpandFlow");
         kernel_shinkFlow = _EditOccCS.FindKernel("ShinkFlow");
         kernel_copy = _EditOccCS.FindKernel("CopyTex");
+        kernel_refine = _EditOccCS.FindKernel("RefineOccTex");
 
         idx_VoxelOffset = Shader.PropertyToID("_VoxelOffset");
         idx_VoxelDim = Shader.PropertyToID("_VoxelDim"); 
@@ -194,9 +201,10 @@ class OccEditManagerEditor : Editor
         //    that.ToggleExpand();
         //    Debug.Log("Update Done ");
         //}
-        if (GUILayout.Button("Update"))
+        if (GUILayout.Button("RefineOccTex"))
         {
-
+            that.RefineOccTex();
+            that.targetOccObj.UpdateOccRenderer();
         }
     }
 
