@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class UI_EditToolBar : MonoBehaviour
 {
     public OccEditManager occManager;
+    public Button DrawBtn;
     public Button GrabBtn;
     public Button GrowthBtn;
     public Button ShinkBtn;
@@ -14,6 +15,7 @@ public class UI_EditToolBar : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        DrawBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Draw; });
         GrabBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Grab; });
         GrowthBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Growth; });
         ShinkBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Shink; });

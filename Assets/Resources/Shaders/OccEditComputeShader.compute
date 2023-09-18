@@ -3,6 +3,8 @@
 #pragma kernel DragFlow
 #pragma kernel ExpandFlow
 #pragma kernel ShinkFlow
+#pragma kernel DrawFlow
+
 #pragma kernel RefineOccTex
 #pragma kernel CopyTex
 
@@ -83,7 +85,7 @@ void DragFlow (uint3 id : SV_DispatchThreadID)
 {
     //uint3 idx = id+ _VoxelOffset;
     uint3 idx = id;
-    float dist = getCursorDist(idx,_CursorPrePos);
+    float dist = getCursorDist(idx,_CursorPos);
     dist = -min(dist,0);
 
     //float w = dist/length(_CursorRadius) *100;
@@ -105,7 +107,7 @@ void ExpandFlow (uint3 id : SV_DispatchThreadID)
 
     //uint3 idx = id+ _VoxelOffset;
     uint3 idx = id;
-    float dist = getCursorDist(idx,_CursorPrePos);
+    float dist = getCursorDist(idx,_CursorPos);
     dist = abs(min(dist,0));
 
     float w = dist/length(_CursorRadius);
@@ -137,7 +139,7 @@ void ShinkFlow (uint3 id : SV_DispatchThreadID)
 {
     //uint3 idx = id+ _VoxelOffset;
     uint3 idx = id;
-    float dist = getCursorDist(idx,_CursorPrePos);
+    float dist = getCursorDist(idx,_CursorPos);
     dist = abs(min(dist,0));
 
     float w = dist/length(_CursorRadius);
@@ -159,5 +161,33 @@ void ShinkFlow (uint3 id : SV_DispatchThreadID)
 
     _OccTex[idx] = saturate( value);
 
+
+}
+
+
+[numthreads(8,8,8)]
+void DrawFlow (uint3 id : SV_DispatchThreadID)
+{
+    uint3 idx = id;
+    float dist = getCursorDist(idx,_CursorPos);
+    dist = abs(min(dist,0));
+
+    float w = dist/length(_CursorRadius);
+    if(w==0){
+        _OccTex[idx] = _InputOccTex[idx];
+        return;
+    }
+    if(w>0.01){
+        _OccTex[idx] = 1;
+        return;
+    }
+    
+    float3 normal = normalize( CalculateGradient((float3(idx)+0.5)/float3(_VoxelDim)));
+    float3 vec = -w*normal*32;
+
+    float3 fromPos = idx+vec +0.5f;
+    float value = SampleLinear(fromPos/float3(_VoxelDim));
+
+    _OccTex[idx] = saturate( value);
 
 }

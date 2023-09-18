@@ -11,7 +11,8 @@ public class OccEditManager : MonoBehaviour
     {
         Grab,
         Growth,
-        Shink
+        Shink,
+        Draw
     }
 
     public OccupancyFieldGraphObject targetOccObj;
@@ -20,9 +21,6 @@ public class OccEditManager : MonoBehaviour
     public Vector3 CursorPos = Vector3.zero;
 
     Vector3 CursorPrePos = Vector3.zero;
-
-    public bool useExpand = true;
-
 
     //private EditToolType _currentEditToolType;
     public EditToolType currentEditToolType = EditToolType.Grab;
@@ -43,6 +41,7 @@ public class OccEditManager : MonoBehaviour
     int kernel_dragFlow;
     int kernel_expandFlow;
     int kernel_shinkFlow;
+    int kernel_drawFlow;
     int kernel_copy;
     int kernel_refine;
     int idx_VoxelOffset;
@@ -75,20 +74,27 @@ public class OccEditManager : MonoBehaviour
         DispatchTexSize(_EditOccCS, kernel_copy);
         SetCursorBuffer(_EditOccCS);
 
-        if (currentEditToolType == EditToolType.Grab)
+        if (currentEditToolType == EditToolType.Draw)
+        {
+            _EditOccCS.SetTexture(kernel_drawFlow, idx_InputOccTex, tempTex);
+            _EditOccCS.SetTexture(kernel_drawFlow, idx_OccTex, OccTex);
+            DispatchTexSize(_EditOccCS, kernel_drawFlow);
+        }
+
+        else if (currentEditToolType == EditToolType.Grab)
         {
             _EditOccCS.SetTexture(kernel_dragFlow, idx_InputOccTex, tempTex);
             _EditOccCS.SetTexture(kernel_dragFlow, idx_OccTex, OccTex);
             DispatchTexSize(_EditOccCS, kernel_dragFlow);
         }
 
-        if (currentEditToolType == EditToolType.Growth)
+        else if (currentEditToolType == EditToolType.Growth)
         {
             _EditOccCS.SetTexture(kernel_expandFlow, idx_InputOccTex, tempTex);
             _EditOccCS.SetTexture(kernel_expandFlow, idx_OccTex, OccTex);
             DispatchTexSize(_EditOccCS, kernel_expandFlow);
         }
-        if (currentEditToolType == EditToolType.Shink)
+        else if (currentEditToolType == EditToolType.Shink)
         {
             _EditOccCS.SetTexture(kernel_shinkFlow, idx_InputOccTex, tempTex);
             _EditOccCS.SetTexture(kernel_shinkFlow, idx_OccTex, OccTex);
@@ -144,6 +150,7 @@ public class OccEditManager : MonoBehaviour
         kernel_shinkFlow = _EditOccCS.FindKernel("ShinkFlow");
         kernel_copy = _EditOccCS.FindKernel("CopyTex");
         kernel_refine = _EditOccCS.FindKernel("RefineOccTex");
+        kernel_drawFlow = _EditOccCS.FindKernel("DrawFlow");
 
         idx_VoxelOffset = Shader.PropertyToID("_VoxelOffset");
         idx_VoxelDim = Shader.PropertyToID("_VoxelDim"); 
@@ -155,19 +162,6 @@ public class OccEditManager : MonoBehaviour
         idx_InputOccTex = Shader.PropertyToID("_InputOccTex");
 
     }
-
-    //public void ToggleExpand()
-    //{
-    //    useExpand = !useExpand;
-    //    if (useExpand)
-    //    {
-    //        kernel_dragFlow = _EditOccCS.FindKernel("ExpandFlow");
-    //    }
-    //    else
-    //    {
-    //        kernel_dragFlow = _EditOccCS.FindKernel("DragFlow");
-    //    }
-    //}
 
     void Awake()
     {

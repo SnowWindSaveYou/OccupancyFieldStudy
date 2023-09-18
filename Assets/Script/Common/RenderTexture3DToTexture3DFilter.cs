@@ -11,7 +11,7 @@ public class RenderTexture3DToTexture3DFilter
     RenderTextureFormat formatRT = RenderTextureFormat.RFloat;
     public RenderTexture3DToTexture3DFilter()
     {
-        sliceCS = Resources.Load<ComputeShader>("SliceRenderTex");
+        sliceCS = Resources.Load<ComputeShader>("Shaders/SliceRenderTex");
     }
 
     RenderTexture Copy3DSliceToRenderTexture(RenderTexture source, int layer)

@@ -36,6 +36,10 @@ public class OccupancyFieldGraphObject : MonoBehaviour
             OccupanceTex.Create();
         }
     }
+    private void Start()
+    {
+        this.UpdateOccRenderer();
+    }
 
     // Update is called once per frame
     void Update()
@@ -58,10 +62,18 @@ class OccupancyFieldGraphObjectEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        if (GUILayout.Button("Update"))
+        if (GUILayout.Button("Update Renderer"))
         {
             that.UpdateOccRenderer();
             Debug.Log("Update Done ");
+        }
+
+        if (GUILayout.Button("Save Tex"))
+        {
+            //var saverer = new RenderTexture3DToTexture3DFilter();
+            //saverer.Save(that.OccupanceTex,that.name);
+            AssetDatabase.CreateAsset(that.OccupanceTex, "Assets/" + that.name + ".tex3d.asset");
+            Debug.Log("Saved Tex");
         }
     }
 
