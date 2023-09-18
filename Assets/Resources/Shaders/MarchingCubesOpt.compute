@@ -355,6 +355,7 @@ static const int vertexCountList[256]  = {0, 3, 3, 6, 3, 6, 6, 9, 3, 6, 6, 9,
 
 float SampleData(float3 pos) {
 	if(_sampleType ==0){//defualt
+
 		if(all(pos>=0)&& all(pos<_gridSize)){
 			float d = _densityTexture.Load(float4(pos, 0)).x;
 			return d;
@@ -369,36 +370,9 @@ float SampleData(float3 pos) {
 		}	
 	}
 
-	return 3072;
-}
-float SampleData2(float3 pos) {
-	if(all(pos>=0)&& all(pos<_gridSize)){
-		float d = _densityTexture.Load(float4(pos, 0)).x;
-		if(d.x>=2)// 1024 unfilled block
-			return 0.51;
-		return d;
-	}
-	return 3072;
+	return 0;
 }
 
-float SampleDataWithLerp(float3 pos) {
-	if(all(pos>=0)&& all(pos<_gridSize)){
-		float d = _densityTexture.Load(float4(pos, 0)).x;
-		if(pos.z>_layerStart&& pos.z<_layerEnd){
-			float dstart = _densityTexture.Load(float4(pos.xy,_layerStart, 0)).x;
-			float dend = _densityTexture.Load(float4(pos.xy,_layerEnd, 0)).x;
-			if(dstart>=2||dend>=2){
-				dstart = min(dstart,dend);
-				dend = dstart;
-			}
-			d = min(d, lerp(dstart,dend, (pos.z-_layerStart)/(_layerEnd-_layerStart)));
-		}
-		if(d.x>=2)// 1024 unfilled block
-			return 0.51;
-		return d;
-	}
-	return 3072;
-}
 
 
 int getMaskId(uint3 id){
@@ -545,7 +519,8 @@ void MarchingCubes(uint3 threadId : SV_DispatchThreadID)
 
 			float3 v01 =  v1.vPosition-v0.vPosition;
 			float3 v02 =  v2.vPosition- v0.vPosition;
-			//float3 tn = normalize( cross(v01,v02));
+			float3 tn = normalize( cross(v01,v02));
+			
 			//v0.vNormal = tn;
 			//v1.vNormal = tn;
 			//v2.vNormal = tn;
@@ -553,14 +528,18 @@ void MarchingCubes(uint3 threadId : SV_DispatchThreadID)
 			v1.vNormal = normalize(CalculateGradient(v1.vPosition));
 			v2.vNormal = normalize(CalculateGradient(v2.vPosition));
 
+			//
+			v0.vNormal = sign(dot(tn,v0.vNormal ))*v0.vNormal ;
+			v1.vNormal = sign(dot(tn,v1.vNormal ))*v1.vNormal ;
+			v2.vNormal = sign(dot(tn,v2.vNormal ))*v2.vNormal ;
 
-			t.v[0] = v2;
+			// t.v[0] = v2;
+			// t.v[1] = v1;
+			// t.v[2] = v0;
+
+			t.v[0] = v0;
 			t.v[1] = v1;
-			t.v[2] = v0;
-
-			//t.v[0] = v0;
-			//t.v[1] = v1;
-			//t.v[2] = v2;
+			t.v[2] = v2;
 
 			triangleRW.Append(t);
 		}

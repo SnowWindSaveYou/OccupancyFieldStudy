@@ -3,7 +3,7 @@
 #pragma kernel DragFlow
 #pragma kernel ExpandFlow
 #pragma kernel ShinkFlow
-
+#pragma kernel RefineOccTex
 #pragma kernel CopyTex
 
 RWTexture3D<float> _OccTex;
@@ -56,6 +56,27 @@ void CopyTex (uint3 id : SV_DispatchThreadID)
     _OccTex[idx] = _InputOccTex[idx];
 }
 
+[numthreads(8,8,8)]
+void RefineOccTex (uint3 id : SV_DispatchThreadID)
+{
+    uint3 idx = id;
+    float curr = _OccTex[idx];
+    if(curr<=0||curr>=1)return;
+   // int a = 0;
+
+    float a = _OccTex[idx+int3(1,0,0)];
+    float b = _OccTex[idx-int3(1,0,0)];
+    float c = _OccTex[idx+int3(0,1,0)];
+    float d = _OccTex[idx-int3(0,1,0)];
+    float e = _OccTex[idx+int3(0,0,1)];
+    float f = _OccTex[idx-int3(0,0,1)];
+
+    if(   
+        (a+b+c+d+e+f)<1
+    ){
+         _OccTex[idx]=0;
+    }
+}
 
 [numthreads(8,8,8)]
 void DragFlow (uint3 id : SV_DispatchThreadID)
@@ -81,40 +102,7 @@ void DragFlow (uint3 id : SV_DispatchThreadID)
 [numthreads(8,8,8)]
 void ExpandFlow (uint3 id : SV_DispatchThreadID)
 {
-    //uint3 idx = id+ _VoxelOffset;
-    uint3 idx = id;
-    float dist = getCursorDist(idx,_CursorPrePos);
-    dist = abs(min(dist,0));
 
-    float w = dist/length(_CursorRadius);
-   // float w = dist;
-    if(w==0){
-        _OccTex[idx] = _InputOccTex[idx];
-        return;
-
-    }
-
-    float val = _OccTex[idx] ;
-    if(val==0){
-        return;
-    }
-
-   // w = w*w*100*length(_CursorRadius)*10;
-    float3 normal = normalize( CalculateGradient((float3(idx)+0.5)/float3(_VoxelDim)));
-    float3 vec = w*normal*32;
-
-    float3 fromPos = idx+vec +0.5f;
-    float value = SampleLinear(fromPos/float3(_VoxelDim));
-
-    _OccTex[idx] = saturate( value);
-
-}
-
-
-
-[numthreads(8,8,8)]
-void ShinkFlow (uint3 id : SV_DispatchThreadID)
-{
     //uint3 idx = id+ _VoxelOffset;
     uint3 idx = id;
     float dist = getCursorDist(idx,_CursorPrePos);
@@ -140,5 +128,36 @@ void ShinkFlow (uint3 id : SV_DispatchThreadID)
     float value = SampleLinear(fromPos/float3(_VoxelDim));
 
     _OccTex[idx] = saturate( value);
+}
+
+
+
+[numthreads(8,8,8)]
+void ShinkFlow (uint3 id : SV_DispatchThreadID)
+{
+    //uint3 idx = id+ _VoxelOffset;
+    uint3 idx = id;
+    float dist = getCursorDist(idx,_CursorPrePos);
+    dist = abs(min(dist,0));
+
+    float w = dist/length(_CursorRadius);
+    if(w==0){
+        _OccTex[idx] = _InputOccTex[idx];
+        return;
+
+    }
+
+    float val = _OccTex[idx] ;
+    if(val==0){
+        return;
+    }
+    float3 normal = normalize( CalculateGradient((float3(idx)+0.5)/float3(_VoxelDim)));
+    float3 vec = w*normal*16;
+
+    float3 fromPos = idx+vec +0.5f;
+    float value = SampleLinear(fromPos/float3(_VoxelDim));
+
+    _OccTex[idx] = saturate( value);
+
 
 }

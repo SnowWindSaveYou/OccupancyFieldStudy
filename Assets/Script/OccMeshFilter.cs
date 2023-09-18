@@ -12,8 +12,8 @@ public class OccMeshFilter : MonoBehaviour
     {
         meshFilter.mesh = OccGo.GetMesh();
         meshCollider.sharedMesh = meshFilter.mesh;
-        meshFilter.mesh.RecalculateBounds();
-        meshFilter.mesh.RecalculateNormals();
+        //meshFilter.mesh.RecalculateBounds();
+        //meshFilter.mesh.RecalculateNormals();
     }
 
     private void Awake()

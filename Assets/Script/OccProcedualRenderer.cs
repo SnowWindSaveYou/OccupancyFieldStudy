@@ -15,7 +15,7 @@ public class OccProcedualRenderer : MonoBehaviour
 
     public void UpdateRender()
     {
-
+        if (!this.isActiveAndEnabled) return;
         _Camera.RemoveCommandBuffer(_occCameraEvent, _occupancyRenderCmd);
         _occupancyRenderCmd.Clear();
 
@@ -37,6 +37,18 @@ public class OccProcedualRenderer : MonoBehaviour
     void Start()
     {
 
+    }
+
+    private void OnEnable()
+    {
+        if(_occupancyRenderCmd!=null)
+            _Camera.AddCommandBuffer(_occCameraEvent, _occupancyRenderCmd);
+    }
+
+    private void OnDisable()
+    {
+        if (_occupancyRenderCmd != null&& _Camera.isActiveAndEnabled)
+            _Camera.RemoveCommandBuffer(_occCameraEvent, _occupancyRenderCmd);
     }
 
     // Update is called once per frame

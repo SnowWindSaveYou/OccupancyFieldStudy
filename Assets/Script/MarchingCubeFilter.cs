@@ -87,7 +87,7 @@ public class MarchingCubeFilter
 
         if (outputVertexBuffer == null)
         {
-            int count = Math.Min((gridSize.x * gridSize.y * gridSize.z) / 10, MAX_VTX);//TODO
+            int count = Math.Min((gridSize.x * gridSize.y * gridSize.z) / 5, MAX_VTX);//TODO
             outputVertexBuffer = new ComputeBuffer(count, sizeof(float) * 18, ComputeBufferType.Append);
             countBufferLength = count;
         }
@@ -104,8 +104,8 @@ public class MarchingCubeFilter
         outputArgBuffer.SetData(args);
         ComputeBuffer.CopyCount(outputVertexBuffer, outputArgBuffer, 0);
 
-        outputArgBuffer.GetData(args);
-        Debug.Log("vertices Count: " + args[0]);
+        //outputArgBuffer.GetData(args);
+        //Debug.Log("vertices Count: " + args[0]);
         MarchingCubesCS.Dispatch(kernelTriTOVtx, 1, 1, 1);// for render
     }
 
@@ -129,6 +129,7 @@ public class MarchingCubeFilter
 
 
         Dictionary<Vector3, int> vertexsDict = new Dictionary<Vector3, int>();
+        //Dictionary<Vector3, Vector3> normalsDict = new Dictionary<Vector3, Vector3>();
 
         // 收集所有顶点
         int vid = 0;
@@ -145,7 +146,12 @@ public class MarchingCubeFilter
             if (!vertexsDict.ContainsKey(position))
             {
                 vertexsDict.Add(position, vid++);
+                //normalsDict.Add(position, MeshTransformMatrix.inverse.MultiplyVector(vertexsArg[i].vNormal).normalized);
             }
+            //else
+            //{
+            //    normalsDict[position] =  (normalsDict[position]+MeshTransformMatrix.inverse.MultiplyVector(vertexsArg[i].vNormal).normalized)*0.5f;
+            //}
         }
         //Debug.Log("[MarchingCube] get vertexs count" + vertexsDict.Count.ToString());
 
@@ -173,17 +179,18 @@ public class MarchingCubeFilter
             }
             int idx = vertexsDict[position];
             vertexs[idx] = position;
-            //normals[idx] = vertexsArg[i].vNormal;
             normals[idx] = MeshTransformMatrix.inverse.MultiplyVector(vertexsArg[i].vNormal).normalized;
+            //normals[idx] = normalsDict[position];
             triengles[i] = idx;
         }
 
         mesh.SetVertices(vertexs);
         mesh.SetTriangles(triengles, 0);// idx是短整型
-                                        //mesh.SetNormals(normals);
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
-        mesh.OptimizeReorderVertexBuffer();
+        mesh.SetNormals(normals);
+        //mesh.SetNormals(normals);
+        //mesh.RecalculateNormals();
+        //mesh.RecalculateBounds();
+        //mesh.OptimizeReorderVertexBuffer();
         return mesh;
     }
 
