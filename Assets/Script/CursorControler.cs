@@ -9,7 +9,7 @@ public class CursorControler : MonoBehaviour
 
     public bool _mouseDraging = false;
     float _preDist = 7;
-    float _offsetZ = 0;
+    //float _offsetZ = 0;
     bool _isEditing = false;
     Vector3 _preMousePos;
     public bool MissAttaching = true;
@@ -92,7 +92,7 @@ public class CursorControler : MonoBehaviour
         {
             this.transform.hasChanged = false;
             OnTranslate?.Invoke(this.transform.position);
-            OnScale?.Invoke(this.transform.lossyScale.x);
+            OnScale?.Invoke(this.transform.lossyScale.x/2);
         }
 
         if (!_mouseDraging)

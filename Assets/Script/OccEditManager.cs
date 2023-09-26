@@ -6,34 +6,40 @@ using UnityEngine.Rendering;
 
 public class OccEditManager : MonoBehaviour
 {
-    
+
     public enum EditToolType
     {
         Grab,
         Growth,
         Shink,
-        Draw
+        Draw,
+        Toward
     }
 
     public OccupancyFieldGraphObject targetOccObj;
 
     public Vector3 CursorRadius = Vector3.zero;
     public Vector3 CursorPos = Vector3.zero;
-
+    public float Intensity = 0.25f;
     Vector3 CursorPrePos = Vector3.zero;
 
-    //private EditToolType _currentEditToolType;
+    bool didInitEdit = false;
+    public bool refineAfterEdit = false;
+
     public EditToolType currentEditToolType = EditToolType.Grab;
 
 
     public void SetCursorSize(float r)
     {
-        CursorRadius = 1.0f / targetOccObj.transform.lossyScale.x * targetOccObj.VoxelSize *r *Vector3.one;
+        CursorRadius = 1.0f / targetOccObj.transform.lossyScale.x * targetOccObj.VoxelSize * r * Vector3.one;
+        Shader.SetGlobalVector(idx_CursorRadius, CursorRadius);
     }
     public void SetCursorPos(Vector3 worldPos)
     {
         CursorPrePos = CursorPos;
         CursorPos = (targetOccObj.transform.worldToLocalMatrix.MultiplyPoint(worldPos) + 0.5f * Vector3.one) * targetOccObj.VoxelSize;
+        Shader.SetGlobalVector(idx_CursorPos, CursorPos);
+
     }
 
     RenderTexture _TempOccTex;
@@ -42,20 +48,25 @@ public class OccEditManager : MonoBehaviour
     int kernel_expandFlow;
     int kernel_shinkFlow;
     int kernel_drawFlow;
+    int kernel_towardFlow;
     int kernel_copy;
     int kernel_refine;
+
+
     int idx_VoxelOffset;
     int idx_VoxelDim;
     int idx_CursorPos;
     int idx_CursorPrePos;
     int idx_CursorRadius;
+    int idx_Intensity;
+
     int idx_OccTex;
     int idx_InputOccTex;
 
 
     public void handleEditBegin()
     {
-
+        InitEdit();
     }
     public void handleEditEnd()
     {
@@ -66,10 +77,9 @@ public class OccEditManager : MonoBehaviour
         if (CursorPrePos == CursorPos) return;
         var tempTex = GetTempTex();
         var OccTex = targetOccObj.OccupanceTex;
-        _EditOccCS.SetInts(idx_VoxelDim, new int[3] { OccTex.width ,OccTex.height, OccTex.volumeDepth});
 
         //targetOccObj
-        _EditOccCS.SetTexture(kernel_copy,idx_InputOccTex, OccTex);
+        _EditOccCS.SetTexture(kernel_copy, idx_InputOccTex, OccTex);
         _EditOccCS.SetTexture(kernel_copy, idx_OccTex, tempTex);
         DispatchTexSize(_EditOccCS, kernel_copy);
         SetCursorBuffer(_EditOccCS);
@@ -100,7 +110,14 @@ public class OccEditManager : MonoBehaviour
             _EditOccCS.SetTexture(kernel_shinkFlow, idx_OccTex, OccTex);
             DispatchTexSize(_EditOccCS, kernel_shinkFlow);
         }
-        //RefineOccTex();
+        else if (currentEditToolType == EditToolType.Toward)
+        {
+            _EditOccCS.SetTexture(kernel_towardFlow, idx_InputOccTex, tempTex);
+            _EditOccCS.SetTexture(kernel_towardFlow, idx_OccTex, OccTex);
+            DispatchTexSize(_EditOccCS, kernel_towardFlow);
+        }
+        if (refineAfterEdit)
+            RefineOccTex();
         targetOccObj.UpdateOccRenderer();
     }
 
@@ -113,15 +130,17 @@ public class OccEditManager : MonoBehaviour
 
     void SetCursorBuffer(ComputeShader computeShader)
     {
+        computeShader.SetFloat(idx_Intensity, Intensity);
         computeShader.SetVector(idx_CursorPos, CursorPos);
         computeShader.SetVector(idx_CursorRadius, CursorRadius);
+
         computeShader.SetVector(idx_CursorPrePos, CursorPrePos);
     }
 
     void DispatchTexSize(ComputeShader computeShader, int kernel)
     {
         var OccTex = targetOccObj.OccupanceTex;
-        computeShader.Dispatch(kernel,Mathf.CeilToInt(OccTex.width / 8.0f), Mathf.CeilToInt(OccTex.height / 8.0f), Mathf.CeilToInt(OccTex.volumeDepth / 8.0f));
+        computeShader.Dispatch(kernel, Mathf.CeilToInt(OccTex.width / 8.0f), Mathf.CeilToInt(OccTex.height / 8.0f), Mathf.CeilToInt(OccTex.volumeDepth / 8.0f));
     }
 
     void DispatchCursorSize(ComputeShader computeShader, int kernel)
@@ -151,15 +170,28 @@ public class OccEditManager : MonoBehaviour
         kernel_copy = _EditOccCS.FindKernel("CopyTex");
         kernel_refine = _EditOccCS.FindKernel("RefineOccTex");
         kernel_drawFlow = _EditOccCS.FindKernel("DrawFlow");
+        kernel_towardFlow = _EditOccCS.FindKernel("TowardFlow");
 
         idx_VoxelOffset = Shader.PropertyToID("_VoxelOffset");
-        idx_VoxelDim = Shader.PropertyToID("_VoxelDim"); 
-        idx_CursorPos = Shader.PropertyToID("_CursorPos"); 
-        idx_CursorPrePos = Shader.PropertyToID("_CursorPrePos"); 
+        idx_VoxelDim = Shader.PropertyToID("_VoxelDim");
+        idx_CursorPos = Shader.PropertyToID("_CursorPos");
+        idx_CursorPrePos = Shader.PropertyToID("_CursorPrePos");
         idx_CursorRadius = Shader.PropertyToID("_CursorRadius");
+        idx_Intensity = Shader.PropertyToID("_Intensity");
 
         idx_OccTex = Shader.PropertyToID("_OccTex");
         idx_InputOccTex = Shader.PropertyToID("_InputOccTex");
+
+    }
+
+    void InitEdit()
+    {
+        if (didInitEdit) return;
+        didInitEdit = true;
+        var OccTex = targetOccObj.OccupanceTex;
+        Shader.SetGlobalVector(idx_VoxelDim, (Vector3)new Vector3Int(OccTex.width, OccTex.height, OccTex.volumeDepth));
+        _EditOccCS.SetInts(idx_VoxelDim, new int[3] { OccTex.width, OccTex.height, OccTex.volumeDepth });
+
 
     }
 
@@ -167,11 +199,15 @@ public class OccEditManager : MonoBehaviour
     {
         InitShaders();
     }
+    private void Start()
+    {
+
+    }
 
 
     void Update()
     {
-        
+
     }
 
 

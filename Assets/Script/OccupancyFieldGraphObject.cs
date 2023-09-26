@@ -68,13 +68,13 @@ class OccupancyFieldGraphObjectEditor : Editor
             Debug.Log("Update Done ");
         }
 
-        if (GUILayout.Button("Save Tex"))
-        {
-            //var saverer = new RenderTexture3DToTexture3DFilter();
-            //saverer.Save(that.OccupanceTex,that.name);
-            AssetDatabase.CreateAsset(that.OccupanceTex, "Assets/" + that.name + ".tex3d.asset");
-            Debug.Log("Saved Tex");
-        }
+        //if (GUILayout.Button("Save Tex"))
+        //{
+        //    //var saverer = new RenderTexture3DToTexture3DFilter();
+        //    //saverer.Save(that.OccupanceTex,that.name);
+        //    AssetDatabase.CreateAsset(that.OccupanceTex, "Assets/" + that.name + ".tex3d.asset");
+        //    Debug.Log("Saved Tex");
+        //}
     }
 
 }

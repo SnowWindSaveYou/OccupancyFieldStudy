@@ -11,7 +11,7 @@ public class UI_EditToolBar : MonoBehaviour
     public Button GrowthBtn;
     public Button ShinkBtn;
     public Button RaiseBtn;
-
+    public Button TowardBtn;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,11 +19,12 @@ public class UI_EditToolBar : MonoBehaviour
         GrabBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Grab; });
         GrowthBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Growth; });
         ShinkBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Shink; });
+        TowardBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Toward; });
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
