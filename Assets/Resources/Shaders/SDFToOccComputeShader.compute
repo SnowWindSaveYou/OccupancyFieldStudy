@@ -68,4 +68,6 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     rate/=pow(k_size,3);
     rate= 1-rate;
     ResultTex[id.xyz] = rate;
+
+    // ResultTex[id.xyz] = InputTex[id.xyz]>0?0:1;
 }

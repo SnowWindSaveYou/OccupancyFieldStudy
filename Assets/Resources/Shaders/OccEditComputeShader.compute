@@ -29,6 +29,7 @@ float SampleLinear(float3 p)
 	return _InputOccTex.SampleLevel(myLinearClampSampler, p, 0).x;
 }
 
+
 float3 CalculateGradient(float3 p)
 {
 	float3 ratio = 1.0 / (_VoxelDim);
@@ -66,17 +67,17 @@ void CopyTex (uint3 id : SV_DispatchThreadID)
 void RefineOccTex (uint3 id : SV_DispatchThreadID)
 {
     uint3 idx = id;
-    float curr = _OccTex[idx];
+    float curr = _InputOccTex[idx];
     if(curr<=0||curr>=1)return;
 	float val[8] = {
-		_OccTex[(idx + int3(0, 0, 1) )],
-		_OccTex[(idx + int3(1, 0, 1) )],
-		_OccTex[(idx + int3(1, 0, 0) )],
+		_InputOccTex[(idx + int3(0, 0, 1) )],
+		_InputOccTex[(idx + int3(1, 0, 1) )],
+		_InputOccTex[(idx + int3(1, 0, 0) )],
 		curr,
-		_OccTex[(idx + int3(0, 1, 1) )],
-		_OccTex[(idx + int3(1, 1, 1) )],
-		_OccTex[(idx + int3(1, 1, 0) )],
-		_OccTex[(idx + int3(0, 1, 0) )]
+		_InputOccTex[(idx + int3(0, 1, 1) )],
+		_InputOccTex[(idx + int3(1, 1, 1) )],
+		_InputOccTex[(idx + int3(1, 1, 0) )],
+		_InputOccTex[(idx + int3(0, 1, 0) )]
 	};
 	int cubeIndex = 0;
 	if (val[0] < 0.5) cubeIndex |= 1;
@@ -88,10 +89,12 @@ void RefineOccTex (uint3 id : SV_DispatchThreadID)
 	if (val[6] < 0.5) cubeIndex |= 64;
 	if (val[7] < 0.5) cubeIndex |= 128;
     if(cubeIndex==0){
-        _OccTex[idx]=1;
+        //_OccTex[idx]=1;
+        _OccTex[idx]=curr*2;
     }
     if(cubeIndex==255){
-        _OccTex[idx]=0;
+        //_OccTex[idx]=0;
+        _OccTex[idx]=curr*0.5;
     }
     //float a = _OccTex[idx+int3(1,0,0)];
     //float b = _OccTex[idx-int3(1,0,0)];
@@ -113,7 +116,7 @@ void DragFlow (uint3 id : SV_DispatchThreadID)
     //uint3 idx = id+ _VoxelOffset;
     uint3 idx = id;
     float3 idxPos = idx+0.5;
-    float dist = getCursorDist(idxPos,_CursorPrePos);
+    float dist = getCursorDist(idxPos,_CursorPos);
     dist = -min(dist,0);
 
     //float w = dist/length(_CursorRadius) *100;
@@ -131,7 +134,7 @@ void ExpandFlow (uint3 id : SV_DispatchThreadID)
 {
     uint3 idx = id;
     float3 idxPos = idx+0.5;
-    float dist = getCursorDist(idxPos,_CursorPrePos);
+    float dist = getCursorDist(idxPos,_CursorPos);
     dist = abs(min(dist,0));
 
     float w = dist/length(_CursorRadius);
@@ -140,7 +143,7 @@ void ExpandFlow (uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    float val = _OccTex[idx] ;
+    float val = _InputOccTex[idx] ;
     if(val==1){
         return;
     }
@@ -160,7 +163,7 @@ void ShinkFlow (uint3 id : SV_DispatchThreadID)
 {
     uint3 idx = id;
     float3 idxPos = idx+0.5;
-    float dist = getCursorDist(idxPos,_CursorPrePos);
+    float dist = getCursorDist(idxPos,_CursorPos);
 
     if(dist>0.5){
         _OccTex[idx] = _InputOccTex[idx];
@@ -168,18 +171,18 @@ void ShinkFlow (uint3 id : SV_DispatchThreadID)
     }
     dist = abs(min(dist,0));
     float w = dist/length(_CursorRadius);
-    float val = _OccTex[idx] ;
-    //if(val==0){
-    //    return;
-    //}
+    float val = _InputOccTex[idx] ;
+    if(val==0){
+        return;
+    }
     float3 normal = normalize( CalculateGradient(idxPos/float3(_VoxelDim)));
+    //float3 normal = normalize(idxPos- _CursorPos);
     float3 vec = w*normal*_Intensity;
 
     float3 fromPos = idxPos+vec;
     float value = SampleLinear(fromPos/float3(_VoxelDim));
 
     _OccTex[idx] = min(val, value);
-
 
 }
 
@@ -189,7 +192,7 @@ void DrawFlow (uint3 id : SV_DispatchThreadID)
 {
     uint3 idx = id;
     float3 idxPos = idx+0.5;
-    float dist = getCursorDist(idxPos,_CursorPrePos);
+    float dist = getCursorDist(idxPos,_CursorPos);
     if(dist>0.5f){
         _OccTex[idx] = _InputOccTex[idx];
         return;
@@ -208,7 +211,7 @@ void DrawFlow (uint3 id : SV_DispatchThreadID)
                 }
             }
         }
-        _OccTex[idx] =max(_OccTex[idx] , saturate( occ/pow(k_size,3)));
+        _OccTex[idx] =max(_InputOccTex[idx] , saturate( occ/pow(k_size,3)));
         return;
     }
 
@@ -220,7 +223,7 @@ void TowardFlow (uint3 id : SV_DispatchThreadID)
 {
     uint3 idx = id;
     float3 idxPos = idx+0.5;
-    float dist = getCursorDist(idxPos,_CursorPrePos);
+    float dist = getCursorDist(idxPos,_CursorPos);
     if(dist>0){
         _OccTex[idx] = _InputOccTex[idx];
         return;

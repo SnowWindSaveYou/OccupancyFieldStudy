@@ -79,43 +79,85 @@ public class OccEditManager : MonoBehaviour
         var OccTex = targetOccObj.OccupanceTex;
 
         //targetOccObj
-        _EditOccCS.SetTexture(kernel_copy, idx_InputOccTex, OccTex);
-        _EditOccCS.SetTexture(kernel_copy, idx_OccTex, tempTex);
-        DispatchTexSize(_EditOccCS, kernel_copy);
+        //_EditOccCS.SetTexture(kernel_copy, idx_InputOccTex, OccTex);
+        //_EditOccCS.SetTexture(kernel_copy, idx_OccTex, tempTex);
+        //DispatchTexSize(_EditOccCS, kernel_copy);
+        //SetCursorBuffer(_EditOccCS);
+
+        //if (currentEditToolType == EditToolType.Draw)
+        //{
+        //    _EditOccCS.SetTexture(kernel_drawFlow, idx_InputOccTex, tempTex);
+        //    _EditOccCS.SetTexture(kernel_drawFlow, idx_OccTex, OccTex);
+        //    DispatchTexSize(_EditOccCS, kernel_drawFlow);
+        //}
+
+        //else if (currentEditToolType == EditToolType.Grab)
+        //{
+        //    _EditOccCS.SetTexture(kernel_dragFlow, idx_InputOccTex, tempTex);
+        //    _EditOccCS.SetTexture(kernel_dragFlow, idx_OccTex, OccTex);
+        //    DispatchTexSize(_EditOccCS, kernel_dragFlow);
+        //}
+
+        //else if (currentEditToolType == EditToolType.Growth)
+        //{
+        //    _EditOccCS.SetTexture(kernel_expandFlow, idx_InputOccTex, tempTex);
+        //    _EditOccCS.SetTexture(kernel_expandFlow, idx_OccTex, OccTex);
+        //    DispatchTexSize(_EditOccCS, kernel_expandFlow);
+        //}
+        //else if (currentEditToolType == EditToolType.Shink)
+        //{
+        //    _EditOccCS.SetTexture(kernel_shinkFlow, idx_InputOccTex, tempTex);
+        //    _EditOccCS.SetTexture(kernel_shinkFlow, idx_OccTex, OccTex);
+        //    DispatchTexSize(_EditOccCS, kernel_shinkFlow);
+        //}
+        //else if (currentEditToolType == EditToolType.Toward)
+        //{
+        //    _EditOccCS.SetTexture(kernel_towardFlow, idx_InputOccTex, tempTex);
+        //    _EditOccCS.SetTexture(kernel_towardFlow, idx_OccTex, OccTex);
+        //    DispatchTexSize(_EditOccCS, kernel_towardFlow);
+        //}
+        //if (refineAfterEdit)
+        //    RefineOccTex();
+
         SetCursorBuffer(_EditOccCS);
 
         if (currentEditToolType == EditToolType.Draw)
         {
-            _EditOccCS.SetTexture(kernel_drawFlow, idx_InputOccTex, tempTex);
-            _EditOccCS.SetTexture(kernel_drawFlow, idx_OccTex, OccTex);
+            _EditOccCS.SetTexture(kernel_drawFlow, idx_InputOccTex, OccTex );
+            _EditOccCS.SetTexture(kernel_drawFlow, idx_OccTex, tempTex);
             DispatchTexSize(_EditOccCS, kernel_drawFlow);
         }
 
         else if (currentEditToolType == EditToolType.Grab)
         {
-            _EditOccCS.SetTexture(kernel_dragFlow, idx_InputOccTex, tempTex);
-            _EditOccCS.SetTexture(kernel_dragFlow, idx_OccTex, OccTex);
+            _EditOccCS.SetTexture(kernel_dragFlow, idx_InputOccTex, OccTex);
+            _EditOccCS.SetTexture(kernel_dragFlow, idx_OccTex, tempTex);
             DispatchTexSize(_EditOccCS, kernel_dragFlow);
         }
 
         else if (currentEditToolType == EditToolType.Growth)
         {
-            _EditOccCS.SetTexture(kernel_expandFlow, idx_InputOccTex, tempTex);
-            _EditOccCS.SetTexture(kernel_expandFlow, idx_OccTex, OccTex);
+            _EditOccCS.SetTexture(kernel_expandFlow, idx_InputOccTex, OccTex );
+            _EditOccCS.SetTexture(kernel_expandFlow, idx_OccTex, tempTex);
             DispatchTexSize(_EditOccCS, kernel_expandFlow);
         }
-        else if (currentEditToolType == EditToolType.Shink)
-        {
-            _EditOccCS.SetTexture(kernel_shinkFlow, idx_InputOccTex, tempTex);
-            _EditOccCS.SetTexture(kernel_shinkFlow, idx_OccTex, OccTex);
-            DispatchTexSize(_EditOccCS, kernel_shinkFlow);
-        }
+        //else if (currentEditToolType == EditToolType.Shink)
+        //{
+        //    _EditOccCS.SetTexture(kernel_shinkFlow, idx_InputOccTex, OccTex );
+        //    _EditOccCS.SetTexture(kernel_shinkFlow, idx_OccTex, tempTex);
+        //    DispatchTexSize(_EditOccCS, kernel_shinkFlow);
+        //}
         else if (currentEditToolType == EditToolType.Toward)
         {
-            _EditOccCS.SetTexture(kernel_towardFlow, idx_InputOccTex, tempTex);
-            _EditOccCS.SetTexture(kernel_towardFlow, idx_OccTex, OccTex);
+            _EditOccCS.SetTexture(kernel_towardFlow, idx_InputOccTex, OccTex );
+            _EditOccCS.SetTexture(kernel_towardFlow, idx_OccTex, tempTex);
             DispatchTexSize(_EditOccCS, kernel_towardFlow);
         }
+
+        _EditOccCS.SetTexture(kernel_copy, idx_InputOccTex, tempTex );
+        _EditOccCS.SetTexture(kernel_copy, idx_OccTex, OccTex);
+        DispatchTexSize(_EditOccCS, kernel_copy);
+
         if (refineAfterEdit)
             RefineOccTex();
         targetOccObj.UpdateOccRenderer();
@@ -123,6 +165,7 @@ public class OccEditManager : MonoBehaviour
 
     public void RefineOccTex()
     {
+        _EditOccCS.SetTexture(kernel_refine, idx_InputOccTex, GetTempTex());
         _EditOccCS.SetTexture(kernel_refine, idx_OccTex, targetOccObj.OccupanceTex);
         DispatchTexSize(_EditOccCS, kernel_refine);
     }
