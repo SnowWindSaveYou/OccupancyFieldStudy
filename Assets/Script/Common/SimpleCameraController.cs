@@ -6,7 +6,7 @@
 
 using UnityEngine;
 
-namespace UnityTemplateProjects
+namespace OccupancyFieldStudy.UnityTemplateProjects
 {
     public class SimpleCameraController : MonoBehaviour
     {

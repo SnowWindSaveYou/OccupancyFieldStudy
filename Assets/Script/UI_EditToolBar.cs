@@ -3,28 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_EditToolBar : MonoBehaviour
+namespace OccupancyFieldStudy
 {
-    public OccEditManager occManager;
-    public Button DrawBtn;
-    public Button GrabBtn;
-    public Button GrowthBtn;
-    public Button ShinkBtn;
-    public Button RaiseBtn;
-    public Button TowardBtn;
-    // Start is called before the first frame update
-    void Start()
+    public class UI_EditToolBar : MonoBehaviour
     {
-        DrawBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Draw; });
-        GrabBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Grab; });
-        GrowthBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Growth; });
-        ShinkBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Shink; });
-        TowardBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Toward; });
-    }
+        public OccEditManager occManager;
+        public Button DrawBtn;
+        public Button GrabBtn;
+        public Button GrowthBtn;
+        public Button ShinkBtn;
+        public Button RaiseBtn;
+        public Button TowardBtn;
+        // Start is called before the first frame update
+        void Start()
+        {
+            DrawBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Draw; });
+            GrabBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Grab; });
+            GrowthBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Growth; });
+            ShinkBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Shink; });
+            TowardBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Toward; });
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
+        // Update is called once per frame
+        void Update()
+        {
 
+        }
     }
 }
