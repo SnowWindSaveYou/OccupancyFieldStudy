@@ -147,7 +147,9 @@ void ExpandFlow (uint3 id : SV_DispatchThreadID)
     if(val==1){
         return;
     }
-    float3 normal = normalize( CalculateGradient(idxPos/float3(_VoxelDim)));
+    float3 normal = ( CalculateGradient(idxPos/float3(_VoxelDim)));
+    if(length(normal)<0.0001f)return;
+    normal = normalize(normal);
     float3 vec = -w*normal*_Intensity;
 
     float3 fromPos = idxPos+vec;
@@ -170,12 +172,14 @@ void ShinkFlow (uint3 id : SV_DispatchThreadID)
         return;
     }
     dist = abs(min(dist,0));
-    float w = dist/length(_CursorRadius);
+    float w = ( dist/_CursorRadius.x);
     float val = _InputOccTex[idx] ;
     if(val==0){
         return;
     }
-    float3 normal = normalize( CalculateGradient(idxPos/float3(_VoxelDim)));
+    float3 normal = ( CalculateGradient(idxPos/float3(_VoxelDim)));
+    if(length(normal)<0.0001f)return;
+    normal = normalize(normal);
     //float3 normal = normalize(idxPos- _CursorPos);
     float3 vec = w*normal*_Intensity;
 

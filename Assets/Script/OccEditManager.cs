@@ -141,12 +141,12 @@ public class OccEditManager : MonoBehaviour
             _EditOccCS.SetTexture(kernel_expandFlow, idx_OccTex, tempTex);
             DispatchTexSize(_EditOccCS, kernel_expandFlow);
         }
-        //else if (currentEditToolType == EditToolType.Shink)
-        //{
-        //    _EditOccCS.SetTexture(kernel_shinkFlow, idx_InputOccTex, OccTex );
-        //    _EditOccCS.SetTexture(kernel_shinkFlow, idx_OccTex, tempTex);
-        //    DispatchTexSize(_EditOccCS, kernel_shinkFlow);
-        //}
+        else if (currentEditToolType == EditToolType.Shink)
+        {
+            _EditOccCS.SetTexture(kernel_shinkFlow, idx_InputOccTex, OccTex);
+            _EditOccCS.SetTexture(kernel_shinkFlow, idx_OccTex, tempTex);
+            DispatchTexSize(_EditOccCS, kernel_shinkFlow);
+        }
         else if (currentEditToolType == EditToolType.Toward)
         {
             _EditOccCS.SetTexture(kernel_towardFlow, idx_InputOccTex, OccTex );
