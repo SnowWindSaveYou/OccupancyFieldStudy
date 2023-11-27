@@ -1,0 +1,67 @@
+#pragma kernel CalcFFD
+#pragma kernel Forward
+
+struct FFDHandler{
+	float3 initPos;
+	float3 currPos;
+};
+
+RWTexture3D<float3> _FFDTex;
+Texture3D<float> _DataTex;
+RWTexture3D<float> _TargetTex;
+StructuredBuffer<FFDHandler> _FFDHandlerBuffer;
+uint _FFDHandlerBufferCount; 
+
+float3 _gridSize;
+
+SamplerState myLinearClampSampler;
+float SampleLinear(float3 p)
+{
+	return _DataTex.SampleLevel(myLinearClampSampler, p, 0).x;
+}
+
+[numthreads(8,8,8)]
+void CalcFFD (uint3 id : SV_DispatchThreadID)
+{
+	float3 idPos = (id+0.5)/_gridSize;
+	if(_FFDHandlerBufferCount==0){
+		_FFDTex[id] =0;
+		return;
+	}
+	//todo
+	int nearIdx = -1;
+	float minDist = 9999999;
+	float3 vecMove = 0;
+	float sumW = 0;
+	float r =0.3;
+	for(int i = 0;i< _FFDHandlerBufferCount;++i){
+		FFDHandler curr = _FFDHandlerBuffer[i];
+		float dist = length(curr.initPos- idPos) - r;
+		if(dist>0)continue;
+
+		float w = (pow(dist,2))*10;
+		vecMove += -(curr.currPos- curr.initPos)*w;
+		sumW+=w;
+		//if(dist<minDist){
+		//	minDist = dist;
+		//	nearIdx = i;
+		//}
+	}
+	//vecMove/=sumW;
+	//FFDHandler c= _FFDHandlerBuffer[nearIdx];
+	//float dd =10/ (minDist*minDist);
+
+	//float3 vecMove = -(c.currPos- c.initPos) *dd;
+	float3 samplePos = saturate( idPos +vecMove);
+	//_FFDTex[id] = vecMove;// todo
+
+	float targetVal =SampleLinear(samplePos);
+	_TargetTex[id] = targetVal;
+
+
+}
+[numthreads(8,8,8)]
+void Forward (uint3 id : SV_DispatchThreadID)
+{
+	//float3 vecMove
+}

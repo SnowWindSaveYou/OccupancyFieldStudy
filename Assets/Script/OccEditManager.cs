@@ -15,7 +15,8 @@ namespace OccupancyFieldStudy
             Growth,
             Shink,
             Draw,
-            Toward
+            Toward,
+            Other
         }
 
         public OccupancyFieldGraphObject targetOccObj;
@@ -76,10 +77,9 @@ namespace OccupancyFieldStudy
         }
         public void handleEditProcessing()
         {
-            if (
-                (currentEditToolType == EditToolType.Draw
-                || currentEditToolType == EditToolType.Grab)
-                &&(CursorPrePos == CursorPos)) return;
+            if (currentEditToolType == EditToolType.Other||
+                (currentEditToolType == EditToolType.Draw|| currentEditToolType == EditToolType.Grab)&&(CursorPrePos == CursorPos)) 
+                return;
             var tempTex = GetTempTex();
             var OccTex = targetOccObj.OccupanceTex;
 
@@ -134,6 +134,12 @@ namespace OccupancyFieldStudy
             DispatchTexSize(_EditOccCS, kernel_refine);
         }
 
+        public void CopyTex(RenderTexture src, RenderTexture dst)
+        {
+            _EditOccCS.SetTexture(kernel_copy, idx_InputOccTex, src);
+            _EditOccCS.SetTexture(kernel_copy, idx_OccTex, dst);
+            DispatchTexSize(_EditOccCS, kernel_copy);
+        }
 
         void SetCursorBuffer(ComputeShader computeShader)
         {
@@ -155,7 +161,7 @@ namespace OccupancyFieldStudy
             computeShader.Dispatch(kernel, Mathf.CeilToInt(targetOccObj.VoxelSize / 8.0f), Mathf.CeilToInt(targetOccObj.VoxelSize / 8.0f), Mathf.CeilToInt(targetOccObj.VoxelSize / 8.0f));
         }
 
-        RenderTexture GetTempTex()
+        public RenderTexture GetTempTex()
         {
             if (_TempOccTex == null)
             {

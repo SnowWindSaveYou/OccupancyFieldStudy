@@ -14,6 +14,7 @@ namespace OccupancyFieldStudy
         public Button ShinkBtn;
         public Button RaiseBtn;
         public Button TowardBtn;
+        public Button FFDBtn;
         // Start is called before the first frame update
         void Start()
         {
@@ -22,6 +23,7 @@ namespace OccupancyFieldStudy
             GrowthBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Growth; });
             ShinkBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Shink; });
             TowardBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Toward; });
+            FFDBtn.onClick.AddListener(() => { occManager.currentEditToolType = OccEditManager.EditToolType.Other; });
         }
 
         // Update is called once per frame
