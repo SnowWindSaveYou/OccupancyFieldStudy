@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 
 namespace OccupancyFieldStudy
 {
-    public class OccEditManager : MonoBehaviour
+    public class OccEditManager : MonoSingleton<OccEditManager>
     {
 
         public enum EditToolType
@@ -55,16 +55,15 @@ namespace OccupancyFieldStudy
         int kernel_copy;
         int kernel_refine;
 
+        int idx_VoxelOffset = Shader.PropertyToID("_VoxelOffset");
+        int idx_VoxelDim = Shader.PropertyToID("_VoxelDim");
+        int idx_CursorPos = Shader.PropertyToID("_CursorPos");
+        int idx_CursorPrePos = Shader.PropertyToID("_CursorPrePos");
+        int idx_CursorRadius = Shader.PropertyToID("_CursorRadius");
+        int idx_Intensity = Shader.PropertyToID("_Intensity");
 
-        int idx_VoxelOffset;
-        int idx_VoxelDim;
-        int idx_CursorPos;
-        int idx_CursorPrePos;
-        int idx_CursorRadius;
-        int idx_Intensity;
-
-        int idx_OccTex;
-        int idx_InputOccTex;
+        int idx_OccTex = Shader.PropertyToID("_OccTex");
+        int idx_InputOccTex = Shader.PropertyToID("_InputOccTex");
 
 
         public void handleEditBegin()
@@ -177,6 +176,7 @@ namespace OccupancyFieldStudy
         void InitShaders()
         {
             _EditOccCS = Resources.Load<ComputeShader>("Shaders/OccEditComputeShader");
+
             kernel_dragFlow = _EditOccCS.FindKernel("DragFlow");
             kernel_expandFlow = _EditOccCS.FindKernel("ExpandFlow");
             kernel_shinkFlow = _EditOccCS.FindKernel("ShinkFlow");
@@ -184,16 +184,6 @@ namespace OccupancyFieldStudy
             kernel_refine = _EditOccCS.FindKernel("RefineOccTex");
             kernel_drawFlow = _EditOccCS.FindKernel("DrawFlow");
             kernel_towardFlow = _EditOccCS.FindKernel("TowardFlow");
-
-            idx_VoxelOffset = Shader.PropertyToID("_VoxelOffset");
-            idx_VoxelDim = Shader.PropertyToID("_VoxelDim");
-            idx_CursorPos = Shader.PropertyToID("_CursorPos");
-            idx_CursorPrePos = Shader.PropertyToID("_CursorPrePos");
-            idx_CursorRadius = Shader.PropertyToID("_CursorRadius");
-            idx_Intensity = Shader.PropertyToID("_Intensity");
-
-            idx_OccTex = Shader.PropertyToID("_OccTex");
-            idx_InputOccTex = Shader.PropertyToID("_InputOccTex");
 
         }
 
@@ -239,11 +229,7 @@ namespace OccupancyFieldStudy
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            //if (GUILayout.Button("ToggleExpand"))
-            //{
-            //    that.ToggleExpand();
-            //    Debug.Log("Update Done ");
-            //}
+
             if (GUILayout.Button("RefineOccTex"))
             {
                 that.RefineOccTex();

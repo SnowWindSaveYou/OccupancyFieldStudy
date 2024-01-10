@@ -52,12 +52,14 @@ namespace OccupancyFieldStudy {
 
         void HandleFFDHandlerUpdated()
         {
+            if (FFDHandlers.Count < 2) return;//TODO
             var occ = oem.targetOccObj;
             if (FFDHandlerBuffer==null || FFDHandlerBuffer.count != FFDHandlers.Count)
             {
                 if (FFDHandlerBuffer != null) FFDHandlerBuffer.Release();
                  FFDHandlerBuffer = new ComputeBuffer(FFDHandlers.Count, sizeof(float) * 6);
                 oem.CopyTex(occ.OccupanceTex, oem.GetTempTex());
+                this.enableSetupHandler = false;
             }
             var ffdArr = FFDHandlers.Select(o => o.GetStruct()).ToArray();
             FFDHandlerBuffer.SetData(ffdArr);
@@ -114,9 +116,11 @@ namespace OccupancyFieldStudy {
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
-            //if (GUILayout.Button("ToggleExpand"))
-            //{
-            //}
+            if (GUILayout.Button("Reset"))
+            {
+                that.FFDHandlers.ForEach((p) => { p.transform.localPosition = p.InitPos; });
+
+            }
 
         }
 

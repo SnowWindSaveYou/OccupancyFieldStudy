@@ -16,6 +16,10 @@ public class FFDHandler : MonoBehaviour
     public Vector3 InitPos;
     public Action OnTransformChanged;
     // Update is called once per frame
+    private void Start()
+    {
+        this.transform.hasChanged = false;//TODO
+    }
     void Update()
     {
         if (this.transform.hasChanged)

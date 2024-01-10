@@ -918,8 +918,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: -0.030478623, y: 0.9679477, z: -0.20207438, w: -0.14599396}
-  m_LocalPosition: {x: 0.36350775, y: 0.49147797, z: 1.3367805}
+  m_LocalRotation: {x: -0.057724774, y: 0.9355423, z: -0.2974212, w: -0.18157396}
+  m_LocalPosition: {x: 0.06376685, y: 0.12195566, z: 0.15781729}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2144,7 +2144,7 @@ MonoBehaviour:
   ShinkBtn: {fileID: 1093627452}
   RaiseBtn: {fileID: 639669086}
   TowardBtn: {fileID: 924709508}
-  FFDBtn: {fileID: 0}
+  FFDBtn: {fileID: 994755774}
 --- !u!1 &1712662467
 GameObject:
   m_ObjectHideFlags: 0

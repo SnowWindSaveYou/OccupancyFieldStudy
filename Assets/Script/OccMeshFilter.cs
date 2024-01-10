@@ -10,9 +10,13 @@ namespace OccupancyFieldStudy
         public MeshFilter meshFilter;
         public MeshCollider meshCollider;
 
+        Vector3[] verticesList;
+        Vector3[] normalsList;
+        int[] indeciesList;
+
         void handleMeshUpdated()
         {
-            meshFilter.mesh = OccGo.GetMesh();
+            meshFilter.mesh = MarchingCubeFilter.Instance.GetMesh(OccGo._mcOutput,Matrix4x4.identity,ref verticesList, ref normalsList, ref indeciesList);
             meshCollider.sharedMesh = meshFilter.mesh;
             //meshFilter.mesh.RecalculateBounds();
             //meshFilter.mesh.RecalculateNormals();

@@ -1,0 +1,42 @@
+#pragma kernel FindNonZero
+#pragma kernel CopyTo
+#pragma kernel Clear
+
+Texture3D<float> _InputTex;
+RWTexture3D<float> _OutputTex;
+RWStructuredBuffer<int> _OutputIntsBuffer;
+
+uint3 _SrcBeginPos;
+uint3 _DstBeginPos;
+uint3 _VolumeDim;
+
+
+[numthreads(8,8,8)]
+void FindNonZero (int3 id : SV_DispatchThreadID)
+{
+    if(_InputTex[id]==0)return;
+
+    // min xyz max xyz
+    InterlockedMin(_OutputIntsBuffer[0],id.x);
+    InterlockedMin(_OutputIntsBuffer[1],id.y);
+    InterlockedMin(_OutputIntsBuffer[2],id.z);
+    InterlockedMax(_OutputIntsBuffer[3],id.x);
+    InterlockedMax(_OutputIntsBuffer[4],id.y);
+    InterlockedMax(_OutputIntsBuffer[5],id.z);
+}
+
+[numthreads(8,8,8)]
+void CopyTo (uint3 id : SV_DispatchThreadID)
+{
+    if(any(id>_VolumeDim))return;
+
+    uint3 srcPos = _SrcBeginPos+id;
+    uint3 dstPos = _DstBeginPos+id;
+    _OutputTex[dstPos] = _InputTex[srcPos];
+}
+
+[numthreads(8,8,8)]
+void Clear (uint3 id : SV_DispatchThreadID)
+{
+    _OutputTex[id] = 0;
+}

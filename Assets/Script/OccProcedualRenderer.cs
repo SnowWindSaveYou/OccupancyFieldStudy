@@ -14,6 +14,9 @@ namespace OccupancyFieldStudy
         CameraEvent _occCameraEvent = CameraEvent.BeforeForwardAlpha;
         public Material OccMaterial;
 
+        static readonly int idx_triangles = Shader.PropertyToID("triangles");
+        static readonly int idx_localToWorldMat = Shader.PropertyToID("localToWorldMat");
+        static readonly int idx_worldToLocalMat = Shader.PropertyToID("worldToLocalMat");
 
         public void UpdateRender()
         {
@@ -21,9 +24,9 @@ namespace OccupancyFieldStudy
             _Camera.RemoveCommandBuffer(_occCameraEvent, _occupancyRenderCmd);
             _occupancyRenderCmd.Clear();
 
-            OccMaterial.SetBuffer("triangles", OccGo.RawVerticesBuffer);
-            OccMaterial.SetMatrix("localToWorldMat", this.transform.localToWorldMatrix);
-            OccMaterial.SetMatrix("worldToLocalMat", this.transform.worldToLocalMatrix);
+            OccMaterial.SetBuffer(idx_triangles, OccGo.RawVerticesBuffer);
+            OccMaterial.SetMatrix(idx_localToWorldMat, this.transform.localToWorldMatrix);
+            OccMaterial.SetMatrix(idx_worldToLocalMat, this.transform.worldToLocalMatrix);
             _occupancyRenderCmd.DrawProceduralIndirect(
                 Matrix4x4.identity, OccMaterial, 0, MeshTopology.Triangles, OccGo.RawArgBuffer);
             _Camera.AddCommandBuffer(_occCameraEvent, _occupancyRenderCmd);
@@ -59,8 +62,8 @@ namespace OccupancyFieldStudy
             if (this.transform.hasChanged)
             {
                 this.transform.hasChanged = false;
-                OccMaterial.SetMatrix("localToWorldMat", this.transform.localToWorldMatrix);
-                OccMaterial.SetMatrix("worldToLocalMat", this.transform.worldToLocalMatrix);
+                OccMaterial.SetMatrix(idx_localToWorldMat, this.transform.localToWorldMatrix);
+                OccMaterial.SetMatrix(idx_worldToLocalMat, this.transform.worldToLocalMatrix);
             }
         }
     }

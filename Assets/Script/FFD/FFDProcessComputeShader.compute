@@ -29,30 +29,49 @@ void CalcFFD (uint3 id : SV_DispatchThreadID)
 		return;
 	}
 	//todo
-	int nearIdx = -1;
-	float minDist = 9999999;
+
 	float3 vecMove = 0;
 	float sumW = 0;
-	float r =0.3;
+	//for(int i = 0;i< _FFDHandlerBufferCount;++i){
+	//	FFDHandler curr = _FFDHandlerBuffer[i];
+	//	float dist = length(curr.initPos- idPos) ;
+	//	float w =  exp(-(dist*dist)/(0.001));
+	//	vecMove += -(curr.currPos- curr.initPos)*w;
+	//	sumW+=w;
+	//}
+	//vecMove/=sumW;
+
+	int nearIdx = -1;
+	float minDist = 9999999;
+	int nearIdx2 = -1;
+	float minDist2 = 9999999;
 	for(int i = 0;i< _FFDHandlerBufferCount;++i){
 		FFDHandler curr = _FFDHandlerBuffer[i];
-		float dist = length(curr.initPos- idPos) - r;
-		if(dist>0)continue;
-
-		float w = (pow(dist,2))*10;
-		vecMove += -(curr.currPos- curr.initPos)*w;
-		sumW+=w;
-		//if(dist<minDist){
-		//	minDist = dist;
-		//	nearIdx = i;
-		//}
+		float dist = length(curr.initPos- idPos) ;
+		if(dist<minDist){
+			minDist2 = minDist;
+			nearIdx2 = nearIdx;
+			minDist = dist;
+			nearIdx = i;
+		}else if(dist< minDist2){
+			minDist2 = dist;
+			nearIdx2 = i;
+		}
 	}
-	//vecMove/=sumW;
-	//FFDHandler c= _FFDHandlerBuffer[nearIdx];
-	//float dd =10/ (minDist*minDist);
 
-	//float3 vecMove = -(c.currPos- c.initPos) *dd;
-	float3 samplePos = saturate( idPos +vecMove);
+	FFDHandler h1 = _FFDHandlerBuffer[nearIdx];
+	FFDHandler h2 = _FFDHandlerBuffer[nearIdx2];
+	float3 vec1 = h1.currPos- h1.initPos;
+	float3 vec2 = h2.currPos- h2.initPos;
+
+
+	float wRange = minDist+minDist2;
+	float w = minDist/wRange;
+	 //w =  exp(-(w*w)/(0.001));
+
+	vecMove = w* vec2 + saturate(1-w)* vec1; 
+
+	float3 samplePos = saturate( idPos -vecMove);
 	//_FFDTex[id] = vecMove;// todo
 
 	float targetVal =SampleLinear(samplePos);
