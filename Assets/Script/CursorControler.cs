@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace OccupancyFieldStudy
 {
@@ -107,14 +108,18 @@ namespace OccupancyFieldStudy
                 MakeMouseAttachToScreenPlane();
                 HandleDraging();
             }
-            if (Input.GetKeyDown(KeyCode.Mouse0))
+            if (!EventSystem.current.IsPointerOverGameObject())
             {
-                HandleDragBegin();
+                if (Input.GetKeyDown(KeyCode.Mouse0))
+                {
+                    HandleDragBegin();
+                }
+                if (Input.GetKeyUp(KeyCode.Mouse0))
+                {
+                    HandleDragEnd();
+                }
             }
-            if (Input.GetKeyUp(KeyCode.Mouse0))
-            {
-                HandleDragEnd();
-            }
+
             // scale scene size
             var mouseScroll = Input.GetAxis("Mouse ScrollWheel");
             if (Input.GetKey(KeyCode.LeftControl) && mouseScroll != 0)

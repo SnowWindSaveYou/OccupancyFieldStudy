@@ -11,6 +11,7 @@ namespace OccupancyFieldStudy
 
         public enum EditToolType
         {
+            None,
             Grab,
             Growth,
             Shink,
@@ -145,7 +146,6 @@ namespace OccupancyFieldStudy
             computeShader.SetFloat(idx_Intensity, Intensity);
             computeShader.SetVector(idx_CursorPos, CursorPos);
             computeShader.SetVector(idx_CursorRadius, CursorRadius);
-
             computeShader.SetVector(idx_CursorPrePos, CursorPrePos);
         }
 
